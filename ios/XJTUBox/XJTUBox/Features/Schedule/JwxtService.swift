@@ -14,7 +14,7 @@ struct JwxtError: LocalizedError {
 }
 
 /// 教务返回的 `{code, datas:{...}}` 信封。
-private struct JwxtEnvelope {
+struct JwxtEnvelope {
     let code: String
     let datas: [String: Any]
 }
