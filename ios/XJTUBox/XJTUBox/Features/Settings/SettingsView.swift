@@ -154,7 +154,7 @@ struct SettingsView: View {
             Spacer(minLength: 0)
             Text(done ? "已可用" : "待移植")
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(done ? AppTheme.accentGreen : .tertiary)
+                .foregroundStyle(done ? AppTheme.accentGreen : AppTheme.tertiaryText)
         }
         .padding(.vertical, 11)
     }
