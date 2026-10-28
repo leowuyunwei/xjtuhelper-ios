@@ -312,7 +312,7 @@ final class CASLogin {
         if HTMLForm.isSafetyVerifyPage(html) {
             captureSafetyVerify(html: html, triggerURL: response.url?.absoluteString ?? postURL)
             let phone = try await fetchMFAChallenge(state: safetySecState ?? "", pathSegment: "sec")
-            throw LoginError.needMFA(phone)
+            throw LoginError.needMFA(phone: phone)
         }
 
         let choices = HTMLForm.accountChoices(in: html)
