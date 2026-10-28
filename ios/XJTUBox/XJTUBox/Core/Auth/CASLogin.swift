@@ -171,7 +171,7 @@ final class CASLogin {
             if !mfaState.isEmpty {
                 // 需要验证码：先拉手机号，抛给 UI
                 let phone = try await fetchMFAChallenge(state: mfaState, pathSegment: "mfa")
-                throw LoginError.needMFA(phone: phone)
+               	throw LoginError.needMFA(phone: phone)
             }
         }
 
@@ -312,7 +312,7 @@ final class CASLogin {
         if HTMLForm.isSafetyVerifyPage(html) {
             captureSafetyVerify(html: html, triggerURL: response.url?.absoluteString ?? postURL)
             let phone = try await fetchMFAChallenge(state: safetySecState ?? "", pathSegment: "sec")
-            throw LoginError.needMFA(phone: phone)
+            	throw LoginError.needMFA(phone: phone)
         }
 
         let choices = HTMLForm.accountChoices(in: html)
