@@ -1,0 +1,69 @@
+name: Build iOS IPA
+
+# 仓库根在 xjtuhelper-ios/main，iOS 工程在 ios/XJTUBox/ 下，
+# 所以这里用 working-directory 切进去，artifact 路径仍按仓库根写。
+#
+# 产物：未签名 .ipa（Artifacts 里下载），签名在你自己的 Windows 上用 SideStore/AltStore 做。
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ios/XJTUBox
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Toolchain info
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          swift --version
+
+      - name: Build (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project XJTUBox.xcodeproj \
+            -scheme XJTUBox \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
+          if [ -z "$APP" ]; then echo "::error::没找到 .app，编译没产出产物"; exit 1; fi
+          echo "app: $APP"
+          rm -rf Payload && mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qr XJTUBox-unsigned.ipa Payload
+          ls -lh XJTUBox-unsigned.ipa
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: ios/XJTUBox/build/Logs/Build/
+          if-no-files-found: ignore
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: XJTUBox-unsigned-ipa
+          path: ios/XJTUBox/XJTUBox-unsigned.ipa
+          retention-days: 30
